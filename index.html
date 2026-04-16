@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Memory Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div id="startScreen" class="screen">
+    <video autoplay loop muted playsinline class="back-video">
+        <source src="images/start-video.mp4" type="video/mp4">
+    </video>
+    <button class="start-btn" onclick="startGameSetup()"></button>
+</div>
+<div id="characterScreen" class="screen" style="display:none;">
+    
+
+    <div class="character-container">
+        <div class="char-card" onclick="selectGender('girl')">
+            <div class="char-image-wrapper">
+                <img src="images/girl-character.png" alt="Girl">
+            </div>
+            <h2 class="char-label">Girl</h2>
+        </div>
+
+        <div class="char-card" onclick="selectGender('boy')">
+            <div class="char-image-wrapper">
+                <img src="images/boy-character.png" alt="Boy">
+            </div>
+            <h2 class="char-label">Boy</h2>
+        </div>
+    </div>
+</div>
+
+<div id="flashScreen" class="screen" style="display:none;">
+    <div class="flash-timer-container">
+        <div id="flashTimerBar"></div>
+    </div>
+    
+    <div id="flashItemsContainer"></div>
+</div>
+<div id="gameScreen" class="screen" style="display:none;">
+    <div class="topBar">
+    <div id="correctContainer" class="status-container"></div> 
+    
+    <div class="timer-container">
+        <div id="timerBar"></div>
+    </div>
+    
+    <div id="errorsContainer" class="status-container"></div>
+</div>
+
+<div id="winScreen" class="overlay" style="display:none;">
+    <div class="end-content">
+        <h1 id="winTitle">🎉 Level Complete!</h1>
+        <div class="win-buttons">
+            <button class="action-btn" onclick="nextLevel()">Next Level</button>
+            <button class="action-btn" onclick="exitToStart()">Exit</button>
+        </div>
+    </div>
+</div>
+
+<div id="loseScreen" class="overlay" style="display:none;">
+    <div class="end-content">
+        <h1>😢 Game Over</h1>
+        <p id="loseReason"></p>
+        <div class="lose-buttons">
+            <button class="action-btn" onclick="retryLevel()">Retry</button>
+            <button class="action-btn" onclick="exitToStart()">Exit</button>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

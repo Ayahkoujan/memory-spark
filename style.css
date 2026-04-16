@@ -1,0 +1,407 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    /* هذا الجزء السحري: يمنع التحريك ويجعل حجم الشاشة ثابت */
+    overflow: hidden; 
+    width: 100vw;
+    height: 100vh;
+    position: fixed; /* يثبت اللعبة في مكانها */
+}
+
+.screen, .overlay {
+    width: 100vw;
+    height: 100vh;
+    /* stretch: لتملأ الخلفية الشاشة بالكامل بدون فراغات */
+    background-size:100% 100%; 
+    background-position: center;
+    background-repeat: no-repeat;
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden; /* يمنع ظهور أي محتوى خارج الحدود */
+    
+    /* توسيط المحتوى (الأزرار والشخصيات) */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+/* تنسيق عنصر الفيديو ليملأ الشاشة خلف الزر */
+.back-video {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    min-width: 100%; /* يضمن تغطية العرض بالكامل */
+    min-height: 100%; /* يضمن تغطية الارتفاع بالكامل */
+    z-index: -1; /* يضع الفيديو خلف زر الـ START */
+    object-fit: cover; /* يضمن أن الفيديو يتمدد ليملأ الشاشة دون أن ينضغط أو يتشوه */
+}
+
+/* تأكدي من تنسيق الحاوية لتكون absolute */
+#startScreen {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden; /* يمنع ظهور شريط التمرير */
+}
+/* 2. خلفية اختيار الشخصية */
+#characterScreen {
+    background-image: url('images/char-select-bg.png');
+    
+}
+/* حاوية الشريط */
+.flash-timer-container {
+    position: absolute;
+    bottom: 50px; /* مكانه في أسفل شاشة الفلاش كارد */
+    width: 60%;
+    height: 15px;
+    background-color: #d2b48c; /* لون بني فاتح للخلفية */
+    border: 3px solid #5d4037; /* إطار بني غامق */
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* الشريط المتحرك باللون البني */
+#flashTimerBar {
+    width: 100%;
+    height: 100%;
+    background-color: #5d4037; /* لون بني غامق للشريط */
+    /* سنجعل التغيير في العرض ناعماً جداً */
+    transition: width 0.1s linear; 
+}
+/* 3. خلفية الفلاش كارد */
+#flashScreen {
+    background-image: url('images/flashcards-bg.png');
+     display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#flashItemsContainer {
+    display: grid;
+    /* تثبيت صفين فقط بحجم متساوي */
+    grid-template-rows: repeat(2, 1fr); 
+    /* إجبار العناصر على ملء الأعمدة أولاً */
+    grid-auto-flow: column; 
+    
+    gap: 20px; 
+    position: absolute;
+    top: 55%; 
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    /* جعل العرض مرن ليتوسع لليمين واليسار حسب الحاجة */
+    width: auto; 
+    max-width: 90vw; /* لضمان عدم خروجها عن الشاشة */
+    justify-content: center; 
+    align-items: center;
+}
+
+#flashItemsContainer img {
+    /* بدلاً من width العادي، سنستخدم هذه الأوامر معاً */
+    width: 350px !important;    /* العرض الذي تحلمين به */
+    height: 250px !important;   /* الطول الذي تحلمين به */
+    
+    /* إجبار المتصفح على عدم تصغيرها تحت هذا الحجم */
+    min-width: 350px !important; 
+    min-height: 250px !important;
+
+    /* التأكد من أن الصورة لا تخرج عن إطارها وتتحرك بمرونة */
+
+    object-fit: contain; 
+    
+    /* لإزالة أي قيود افتراضية من المتصفح */
+    max-width: none !important; 
+    max-height: none !important;
+}
+
+/* 4. خلفية اللعبة والسير */
+#gameScreen {
+    background-image: url('images/gameplay-bg.png');
+    
+}
+
+/* 5. خلفية الفوز */
+#winScreen {
+    background-image: url('images/win-bg.jpeg');
+}
+
+/* 6. خلفية الخسارة */
+#loseScreen {
+    background-image: url('images/lose-bg.jpeg');
+}
+
+/* زر START كصورة */
+.start-btn {
+    background-image: url('images/start-button-asset.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-color: transparent;
+    border: none;
+    /* جربي هذه الأحجام، إذا كانت كبيرة جداً قللي الأرقام */
+    width: 300px; 
+    height: 150px; 
+    cursor: pointer;
+    transition: transform 0.2s;
+    
+    /* وضعية الزر في أسفل الشاشة */
+    position: absolute;
+     /* تحريك من اليسار: إذا أردتيه يميناً زيدي الرقم، يساراً قللي الرقم */
+    left: 53%;  /* جربي 20% لليسار أو 80% لليمين */
+    
+    /* تحريك من الأعلى: إذا أردتيه أسفل زيدي الرقم، أعلى قللي الرقم */
+    top: 75%;   /* جربي 40% للأعلى أو 75% للأسفل */
+    
+    /* إلغاء التوسيط التلقائي القديم */
+    transform: translate(-50%, -50%); 
+}
+
+.start-btn:hover {
+    /* تأثير عند تمرير الماوس مع الحفاظ على المكان */
+    transform: translate(-50%, -50%) scale(1.05);
+}
+/* الشاشات */
+.screen {
+    padding: 20px;
+}
+
+/* تنسيق عنوان الشاشة */
+.title {
+    font-size: 40px;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.character-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 100px; /* المسافة بين الولد والبنت */
+    
+    /* التحكم في موقع المجموعة كاملة فوق الخلفية */
+    position: absolute;
+    left: 50%;   /* تحريك يميناً ويساراً (50% يعني في المنتصف) */
+    top: 50%;    /* تحريك للأعلى والأسفل */
+    transform: translate(-50%, -50%); /* لضمان التمركز الدقيق */
+}
+
+
+/* كرت الشخصية (يحتوي على الصورة والنص) */
+.char-card {
+    display: flex;
+    flex-direction: column; /* يضع النص تحت الصورة مباشرة */
+    align-items: center;    /* يوسط النص تحت الصورة */
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+/* حركة عند تمرير الماوس: تكبير الصورة وتوضيحها */
+.char-card:hover {
+    transform: scale(1.1); /* تكبير بنسبة 10% */
+}
+
+.char-card:active {
+    transform: scale(0.95); /* تأثير الضغط عند النقر */
+}
+
+/* غلاف الصورة */
+.char-image-wrapper {
+    width: 670px; /* عرض الشخصية */
+    height: 500px; /* طول الشخصية */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.char-image-wrapper img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* نص الاسم تحت الصورة */
+.char-label {
+    margin-top: 5px; /* المسافة بين الصورة والنص */
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    background: #f0f0f0;
+    padding: 10px 40px;
+    border-radius: 50px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: 0.3s;
+}
+.timer-container {
+    position: relative; /* غيرناه من absolute لـ relative عشان يحترم اللي جنبه */
+    top: 0; 
+    left: 0;
+    transform: none;
+    width: 300px;
+    height: 20px;
+    background-color: #ddd8d0;
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0; /* يمنع التايمر من الانضغاط */
+}
+#timerBar {
+    width: 100%; /* يبدأ ممتلئاً */
+    height: 100%;
+    background-color: #007bff; /* اللون الأزرق */
+    transition: width 1s linear;
+}
+.end-content {
+    text-align: center;
+    color: white; /* أو أي لون يناسب خلفياتك */
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.5); /* ليكون النص واضحاً فوق الصورة */
+}
+.win-buttons, .lose-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.action-btn {
+    padding: 15px 35px;
+    font-size: 18px;
+    border-radius: 50px;
+    border: 3px solid white;
+    background: #5d4037; /* اللون البني ليتناسب مع التايمر الجديد */
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.action-btn:hover {
+    transform: scale(1.1);
+    background: #795548;
+}
+.char-card:hover .char-label {
+    background: #ffcc00; /* تغيير لون النص عند الاختيار */
+    color: white;
+}
+
+/* صندوق العنصر المتحرك */
+.item-container {
+    position: absolute;
+    top: 200px; /* مكان العناصر عمودياً */
+
+    left: -250px; /* تبدأ من خارج الشاشة يساراً */
+    width: 300px;
+    /* الحركة: 12 ثانية لتصل لآخر الشاشة */
+    animation: moveRight 8s linear forwards; 
+    cursor: pointer;
+}
+
+.item-container img {
+    width: 100%;
+    pointer-events: none; /* لتجنب مشاكل النقر على الصورة بدلاً من الصندوق */
+}
+
+/* الحركة */
+@keyframes moveRight {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(120vw); } /* تتحرك لتتجاوز الشاشة يميناً */
+}
+
+/* الفلاش كارد */
+#flashScreen img {
+    width: 100px;
+    margin: 20px;
+}
+
+/* البار العلوي */
+.topBar {
+    position: absolute;
+    top: 20px;
+    left: 45%;
+    transform: translateX(-50%);
+    
+    /* هذا الجزء هو الأهم لتوزيع العناصر بجانب بعضها */
+    display: flex;
+    flex-direction: row; /* التأكد أنها سطر واحد */
+    justify-content: center; /* توسيط المجموعة كاملة */
+    align-items: center;    /* محاذاة العناصر عمودياً */
+    
+    width: 95%; /* عرض البار العلوي */
+    gap: 20px;  /* المسافة بين التايمر والحاويات */
+    pointer-events: none; /* عشان ما تغطي على السير في الخلفية */
+}
+
+/* شاشة الفوز والخسارة */
+.overlay {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background: rgba(0,0,0,0.8);
+    color:white;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    z-index: 1000;
+}
+
+/* علامة صح وخطأ */
+.mark {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    font-size: 30px;
+    z-index: 10;
+}
+.status-container {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    min-width: 150px; /* مساحة محجوزة عشان التايمر ما يضل يتحرك */
+    pointer-events: auto; /* السماح بالتفاعل إذا لزم الأمر */
+}
+/* حاوية الإكسات (على اليسار) */
+#errorsContainer {
+    justify-content: flex-end; /* يخلي الإكسات تبدأ من جهة التايمر وتتجه لليسار */
+}
+/* حاوية الصح (على اليمين) */
+#correctContainer {
+    justify-content: flex-start; /* يخلي الصح يبدأ من جهة التايمر ويتجه لليمين */
+}
+
+.status-emoji {
+    font-size: 40px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* حركة ظهور جميلة */
+}
+
+@keyframes popIn {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
+}
+/* هذا الكلاس سيُضاف للعنصر عند النقر عليه بشكل صحيح */
+.in-basket {
+    z-index: 5 !important; /* نجعلها خلف اليد أو خلف واجهة السلة إذا أردتِ */
+    
+    /* تحديد موقع السلة - عدلي هذه الأرقام حسب خلفيتك */
+    position: absolute !important;
+    bottom: 15px !important; 
+    right: 45% !important; 
+    top: auto !important; /* نلغي الـ top القديم تبع السير */
+    left: auto !important;
+
+    /* جعل العناصر تتوزع قليلاً داخل السلة بدل أن تكون فوق بعضها تماماً */
+    margin-right: calc(var(--offset, 0) * 20px); 
+
+    /* تصغير الحجم ليناسب حجم السلة */
+    
+    
+    /* حركة ناعمة للوصول للسلة */
+    transition: all 0.6s ease-in-out;
+    
+    /* إيقاف حركة السير */
+    animation: none !important;
+}
+
